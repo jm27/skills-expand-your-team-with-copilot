@@ -26,6 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
+  // Dark mode elements
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const toggleIcon = darkModeToggle ? darkModeToggle.querySelector(".toggle-icon") : null;
+  const toggleText = darkModeToggle ? darkModeToggle.querySelector("span:last-child") : null;
+
   // Activity categories with corresponding colors
   const activityTypes = {
     sports: { label: "Sports", color: "#e8f5e9", textColor: "#2e7d32" },
@@ -45,6 +50,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Authentication state
   let currentUser = null;
+
+  // Dark mode state
+  let isDarkMode = false;
+
+  // Check for saved dark mode preference
+  function checkDarkMode() {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode === "true") {
+      isDarkMode = true;
+      document.body.classList.add("dark-mode");
+      updateDarkModeToggle();
+    }
+  }
+
+  // Toggle dark mode
+  function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+    
+    // Save preference
+    localStorage.setItem("darkMode", isDarkMode.toString());
+    updateDarkModeToggle();
+  }
+
+  // Update dark mode toggle button appearance
+  function updateDarkModeToggle() {
+    if (!toggleIcon || !toggleText) return;
+    
+    if (isDarkMode) {
+      toggleIcon.textContent = "☀️";
+      toggleText.textContent = "Light";
+    } else {
+      toggleIcon.textContent = "🌙";
+      toggleText.textContent = "Dark";
+    }
+  }
+
+  // Event listener for dark mode toggle
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener("click", toggleDarkMode);
+  }
 
   // Time range mappings for the dropdown
   const timeRanges = {
@@ -587,6 +638,17 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-buttons">
+        <button class="share-button share-twitter" data-activity="${name}" data-platform="twitter" title="Share on Twitter">
+          𝕏
+        </button>
+        <button class="share-button share-facebook" data-activity="${name}" data-platform="facebook" title="Share on Facebook">
+          f
+        </button>
+        <button class="share-button share-email" data-activity="${name}" data-platform="email" title="Share via Email">
+          ✉
+        </button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -610,6 +672,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    // Add click handlers for share buttons
+    const shareButtons = activityCard.querySelectorAll(".share-button");
+    shareButtons.forEach((button) => {
+      button.addEventListener("click", handleShare);
     });
 
     // Add click handler for register button (only when authenticated)
@@ -716,6 +784,43 @@ document.addEventListener("DOMContentLoaded", () => {
       closeRegistrationModalHandler();
     }
   });
+
+  // Handle social sharing
+  function handleShare(event) {
+    const activityName = event.target.dataset.activity;
+    const platform = event.target.dataset.platform;
+    
+    // Get activity details for sharing
+    const activity = allActivities[activityName];
+    if (!activity) return;
+    
+    // Create share text
+    const shareText = `Check out ${activityName} at Mergington High School! ${activity.description}`;
+    const shareUrl = window.location.href;
+    
+    // Handle different platforms
+    switch (platform) {
+      case 'twitter':
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        window.open(twitterUrl, '_blank', 'width=550,height=420');
+        break;
+      
+      case 'facebook':
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+        window.open(facebookUrl, '_blank', 'width=550,height=420');
+        break;
+      
+      case 'email':
+        const subject = `Check out ${activityName} at Mergington High School`;
+        const body = `${shareText}\n\nLearn more: ${shareUrl}`;
+        const emailUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = emailUrl;
+        break;
+    }
+    
+    // Show success message
+    showMessage(`Activity shared via ${platform}!`, 'success');
+  }
 
   // Create and show confirmation dialog
   function showConfirmationDialog(message, confirmCallback) {
@@ -905,6 +1010,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Initialize app
+  checkDarkMode();
   checkAuthentication();
   initializeFilters();
   fetchActivities();
