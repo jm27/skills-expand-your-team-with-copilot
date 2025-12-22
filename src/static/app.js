@@ -552,6 +552,17 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-buttons">
+        <button class="share-button share-twitter" data-activity="${name}" data-platform="twitter" title="Share on Twitter">
+          𝕏
+        </button>
+        <button class="share-button share-facebook" data-activity="${name}" data-platform="facebook" title="Share on Facebook">
+          f
+        </button>
+        <button class="share-button share-email" data-activity="${name}" data-platform="email" title="Share via Email">
+          ✉
+        </button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -575,6 +586,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    // Add click handlers for share buttons
+    const shareButtons = activityCard.querySelectorAll(".share-button");
+    shareButtons.forEach((button) => {
+      button.addEventListener("click", handleShare);
     });
 
     // Add click handler for register button (only when authenticated)
@@ -673,6 +690,43 @@ document.addEventListener("DOMContentLoaded", () => {
       closeRegistrationModalHandler();
     }
   });
+
+  // Handle social sharing
+  function handleShare(event) {
+    const activityName = event.target.dataset.activity;
+    const platform = event.target.dataset.platform;
+    
+    // Get activity details for sharing
+    const activity = allActivities[activityName];
+    if (!activity) return;
+    
+    // Create share text
+    const shareText = `Check out ${activityName} at Mergington High School! ${activity.description}`;
+    const shareUrl = window.location.href;
+    
+    // Handle different platforms
+    switch (platform) {
+      case 'twitter':
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        window.open(twitterUrl, '_blank', 'width=550,height=420');
+        break;
+      
+      case 'facebook':
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+        window.open(facebookUrl, '_blank', 'width=550,height=420');
+        break;
+      
+      case 'email':
+        const subject = `Check out ${activityName} at Mergington High School`;
+        const body = `${shareText}\n\nLearn more: ${shareUrl}`;
+        const emailUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = emailUrl;
+        break;
+    }
+    
+    // Show success message
+    showMessage(`Activity shared via ${platform}!`, 'success');
+  }
 
   // Create and show confirmation dialog
   function showConfirmationDialog(message, confirmCallback) {
