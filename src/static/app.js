@@ -25,6 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
+  // Dark mode elements
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const toggleIcon = darkModeToggle ? darkModeToggle.querySelector(".toggle-icon") : null;
+  const toggleText = darkModeToggle ? darkModeToggle.querySelector("span:last-child") : null;
+
   // Activity categories with corresponding colors
   const activityTypes = {
     sports: { label: "Sports", color: "#e8f5e9", textColor: "#2e7d32" },
@@ -43,6 +48,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Authentication state
   let currentUser = null;
+
+  // Dark mode state
+  let isDarkMode = false;
+
+  // Check for saved dark mode preference
+  function checkDarkMode() {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode === "true") {
+      isDarkMode = true;
+      document.body.classList.add("dark-mode");
+      updateDarkModeToggle();
+    }
+  }
+
+  // Toggle dark mode
+  function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+    
+    // Save preference
+    localStorage.setItem("darkMode", isDarkMode.toString());
+    updateDarkModeToggle();
+  }
+
+  // Update dark mode toggle button appearance
+  function updateDarkModeToggle() {
+    if (!toggleIcon || !toggleText) return;
+    
+    if (isDarkMode) {
+      toggleIcon.textContent = "☀️";
+      toggleText.textContent = "Light";
+    } else {
+      toggleIcon.textContent = "🌙";
+      toggleText.textContent = "Dark";
+    }
+  }
+
+  // Event listener for dark mode toggle
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener("click", toggleDarkMode);
+  }
 
   // Time range mappings for the dropdown
   const timeRanges = {
@@ -916,6 +967,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Initialize app
+  checkDarkMode();
   checkAuthentication();
   initializeFilters();
   fetchActivities();
