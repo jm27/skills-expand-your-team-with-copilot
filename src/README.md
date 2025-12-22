@@ -213,7 +213,7 @@ This project is maintained by GitHub Copilot as part of the GitHub Skills exerci
 
 ## 📝 Notes
 
-- The application uses in-memory storage via MongoDB, so data persists between restarts
+- The application uses MongoDB for persistent storage, so data is maintained between server restarts
 - All activity schedules support weekday and weekend meetings
 - Student emails must be from the @mergington.edu domain
 - Each activity has a maximum capacity that cannot be exceeded
