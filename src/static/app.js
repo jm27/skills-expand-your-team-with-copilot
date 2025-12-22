@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     // Save preference
-    localStorage.setItem("darkMode", isDarkMode);
+    localStorage.setItem("darkMode", isDarkMode.toString());
     updateDarkModeToggle();
   }
 
